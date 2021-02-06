@@ -28,8 +28,14 @@ while True:
             pygame.QUIT()
             sys.exit()
 
+    #Movimiento de la bola
     ball.x += ball_speed_x
     ball.y += ball_speed_y
+
+    if ball.top <= 0 or ball.bottom >= screen_height:
+        ball_speed_y *= -1
+    if ball.left <= 0 or ball.right >= screen_width:
+        ball_speed_x *= -1
 
     #visual
     screen.fill(bg_color)
