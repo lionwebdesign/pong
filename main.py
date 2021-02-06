@@ -26,7 +26,7 @@ while True:
             sys.exit()
 
     #visual
-    scree.fill(bg_color)
+    screen.fill(bg_color)
     pygame.draw.rect(screen, light_grey, player)
     pygame.draw.rect(screen, light_grey, opponent)
     pygame.draw.ellipse(screen, light_grey, ball)
