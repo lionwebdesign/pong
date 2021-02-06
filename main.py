@@ -21,13 +21,8 @@ light_grey = (200, 200, 200)
 ball_speed_x = 7
 ball_speed_y = 7
 
-while True:
-    #Imput control
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.QUIT()
-            sys.exit()
-
+def ball_animation():
+    global ball_speed_x, ball_speed_y
     #Movimiento de la bola
     ball.x += ball_speed_x
     ball.y += ball_speed_y
@@ -36,6 +31,18 @@ while True:
         ball_speed_y *= -1
     if ball.left <= 0 or ball.right >= screen_width:
         ball_speed_x *= -1
+
+    if ball.colliderect(player) or ball.colliderect(opponent):
+        ball_speed_x *= -1
+
+while True:
+    #Imput control
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.QUIT()
+            sys.exit()
+
+    ball_animation()
 
     #visual
     screen.fill(bg_color)
