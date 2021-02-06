@@ -21,6 +21,7 @@ light_grey = (200, 200, 200)
 ball_speed_x = 7
 ball_speed_y = 7
 player_speed = 0
+opponent_speed = 7
 
 def ball_animation():
     global ball_speed_x, ball_speed_y
@@ -43,6 +44,16 @@ def player_animation():
     if player.bottom >= screen_height:
         player.bottom = screen_height 
 
+def opponent_ai():
+    if opponent.top < ball.y:
+        opponent.top += opponent_speed
+    if opponent.bottom > ball.y:
+        opponent.bottom -= opponent_speed 
+    if opponent.top <= 0:
+        opponent.top = 0
+    if opponent.bottom >= screen_height:
+        opponent.bottom = screen_height
+
 while True:
     #Imput control
     for event in pygame.event.get():
@@ -62,6 +73,7 @@ while True:
 
     ball_animation()
     player_animation()
+    opponent_ai()
 
     #visual
     screen.fill(bg_color)
