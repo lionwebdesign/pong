@@ -3,6 +3,7 @@ import pygame, sys, random
 #Configuración general
 pygame.init()
 clock = pygame.time.Clock()
+pygame.mixer.init()
 
 #Configuración de la pantalla
 screen_width = 1024
@@ -23,19 +24,55 @@ ball_speed_y = 7 * random.choice((1, -1))
 player_speed = 0
 opponent_speed = 7
 
+#Score variables
+player_score = 0
+opponent_score = 0
+game_font = pygame.font.Font("freesansbold.ttf", 32)
+
+#score timer 
+score_time = True
+
+#Sonido
+pong_sound = pygame.mixer.Sound("pong/sounds/pong.ogg")
+score_sound = pygame.mixer.Sound("pong/sounds/score.ogg")
+
 def ball_animation():
-    global ball_speed_x, ball_speed_y
+    global ball_speed_x, ball_speed_y, player_score, opponent_score, score_time
     #Movimiento de la bola
     ball.x += ball_speed_x
     ball.y += ball_speed_y
 
     if ball.top <= 0 or ball.bottom >= screen_height:
+        pygame.mixer.Sound.play(pong_sound)
         ball_speed_y *= -1
-    if ball.left <= 0 or ball.right >= screen_width:
-        ball_restart()
+    
+    if ball.left <= 0: 
+        pygame.mixer.Sound.play(score_sound)
+        player_score += 1
+        score_time = pygame.time.get_ticks()
 
-    if ball.colliderect(player) or ball.colliderect(opponent):
-        ball_speed_x *= -1
+    if ball.right >= screen_width:
+        pygame.mixer.Sound.play(score_sound)
+        opponent_score += 1
+        score_time = pygame.time.get_ticks()
+    
+    if ball.colliderect(player) and ball_speed_x > 0:
+        pygame.mixer.Sound.play(pong_sound)
+        if abs(ball.right - player.left) < 10: 
+            ball_speed_x *= -1
+        elif abs(ball.bottom - player.top) < 10 and ball_speed_y > 0: 
+            ball_speed_y *= -1
+        elif abs(ball.top - player.bottom) < 10 and ball_speed_y < 0: 
+            ball_speed_y *= -1
+    
+    if ball.colliderect(opponent) and ball_speed_x < 0:
+        pygame.mixer.Sound.play(pong_sound)
+        if abs(ball.left - opponent.right) < 10: 
+            ball_speed_x *= -1
+        elif abs(ball.bottom - opponent.top) < 10 and ball_speed_y > 0: 
+            ball_speed_y *= -1
+        elif abs(ball.top - opponent.bottom) < 10 and ball_speed_y < 0: 
+            ball_speed_y *= -1
 
 def player_animation():
     player.y += player_speed
@@ -54,11 +91,27 @@ def opponent_ai():
     if opponent.bottom >= screen_height:
         opponent.bottom = screen_height
 
-def ball_restart():
-    global ball_speed_x, ball_speed_y
+def ball_start():
+    global ball_speed_x, ball_speed_y, score_time
+    current_time = pygame.time.get_ticks()
     ball.center = (screen_width/2, screen_height/2)
-    ball_speed_y *= random.choice((1, -1))
-    ball_speed_x *= random.choice((1, -1))
+
+    if current_time - score_time < 700:
+        numero_tres = game_font.render("3", False, light_grey)
+        screen.blit(numero_tres, (screen_width/2 - 10, screen_height/2 +35))
+    if 700 < current_time - score_time < 1400:
+        numero_dos = game_font.render("2", False, light_grey)
+        screen.blit(numero_dos, (screen_width/2 - 10, screen_height/2 +35))
+    if 1400 < current_time - score_time < 2100:
+        numero_uno = game_font.render("1", False, light_grey)
+        screen.blit(numero_uno, (screen_width/2 - 10, screen_height/2 +35))
+
+    if current_time - score_time < 2100:
+        ball_speed_x, ball_speed_y = 0, 0
+    else:
+        ball_speed_y = 7 * random.choice((1, -1))
+        ball_speed_x = 7 * random.choice((1, -1))
+        score_time = None
 
 while True:
     #Imput control
@@ -87,6 +140,15 @@ while True:
     pygame.draw.rect(screen, light_grey, opponent)
     pygame.draw.ellipse(screen, light_grey, ball)
     pygame.draw.aaline(screen, light_grey, (screen_width/2, 0), (screen_width/2, screen_height))
+
+    if score_time:
+        ball_start()
+
+    player_text = game_font.render(f"{player_score}", False, light_grey)
+    screen.blit(player_text, (screen_width/2 + 15, screen_height/2 + 10))
+
+    opponent_text = game_font.render(f"{opponent_score}", False, light_grey)
+    screen.blit(opponent_text, (screen_width/2 - 30, screen_height/2 + 10))
 
     #Actualización de pantalla
     pygame.display.flip()
